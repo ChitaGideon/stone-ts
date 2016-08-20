@@ -9,20 +9,78 @@ class Parser {
     protected elements:Element[];
     private type:new (list:ASTree[])=>ASTree;
 
+    static rule(clazz?:new (l:ASTree[])=>ASTree){
+        return new Parser(clazz);
+    }
+    static clone(p:Parser){
+        return new Parser(p.type,p.elements);
+    }
 	constructor(clazz:new (list:ASTree[])=>ASTree,elements?:Element[]) {
         this.type = clazz;
         this.elements = elements;
 	}
-    reset(clazz:new (list:ASTree[])=>ASTree){
+    reset(clazz?:new (list:ASTree[])=>ASTree){
         this.elements = [];
-        this.type = clazz;
+        clazz && (this.type = clazz);
+        return this;
     }
     number(clazz?:new ()=>ASTLeaf){
         this.elements.push(new NumToken(clazz))
         return this;
     }
-    
-
+    identifier(reserved:Set<string>,clazz?:new ()=>ASTLeaf){
+        this.elements.push(new IdToken(clazz,reserved));
+        return this;
+    }
+    string(clazz?:new ()=>ASTLeaf){
+        this.elements.push(new StrToken(clazz));
+        return this;
+    }
+    token(...strs:string[]){
+        this.elements.push(new Leaf(strs));
+        return this;
+    }
+    sep(p:Parser){
+        this.elements.push(new Tree(p));
+        return this;
+    }
+    or(...p:Parser[]){
+        this.elements.push(new OrTree(p));
+        return this;
+    }
+    maybe(p:Parser){
+        var p2:Parser = Parser.clone(p);
+        p2.reset();
+        this.elements.push(new OrTree([p,p2]));
+        return this;
+    }
+    option(p:Parser){
+        this.elements.push(new Repeat(p,true));
+        return this;
+    }
+    repeat(p:Parser){
+        this.elements.push(new Repeat(p,false));
+        return this;
+    }
+    expression(subexp:Parser,operators:Operators,clazz?:new (l:ASTree[])=>ASTList){
+        this.elements.push(new Expr(clazz,subexp,operators));
+        return this;
+    }
+    insertChoice(p:Parser){
+        var e:Element = this.elements[0];
+        if(e instanceof OrTree){
+            (<OrTree>e).insert(p);
+        }else{
+            var otherWise:Parser = Parser.clone(this);
+            this.reset();
+            this.or(p,otherWise);
+        }
+        return this;
+    }
+    ast(...strs:string[]){
+        this.elements.push(new Leaf(strs));
+        return this;
+    }
     parse(lexer:Lexer):ASTree{
         var res:ASTree[] = [];
         for (var element of this.elements) {
@@ -30,6 +88,7 @@ class Parser {
         }
         return new this.type(res);
     }
+
     match(lexer:Lexer):boolean{
         if(this.elements.length==0){
             return true;
@@ -61,6 +120,11 @@ class OrTree extends Element{
     constructor(p:Parser[]){
         super();
         this.parsers = p;
+    }
+    insert(p:Parser){
+        // var newParsers:Parser[] = this.parsers.concat();;
+        this.parsers.unshift(p) ;
+        // this.parsers = newParsers;  
     }
     choose(lexer:Lexer):Parser{
         this.parsers.forEach(element => {
