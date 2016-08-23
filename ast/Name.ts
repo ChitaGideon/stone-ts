@@ -3,7 +3,7 @@ import {ASTLeaf} from "./ASTLeaf"
 /**
  * Name
  */
-class Name extends ASTLeaf{
+export class Name extends ASTLeaf{
     constructor(t:Token) {
         super(t);
     }

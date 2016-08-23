@@ -4,7 +4,7 @@ import {ASTLeaf} from "./ASTLeaf"
 /**
  * NumberLiteral
  */
-class NumberLiteral extends ASTLeaf {
+export class NumberLiteral extends ASTLeaf {
     constructor(t:Token) {
         super(t);
     }

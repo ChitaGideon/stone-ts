@@ -4,7 +4,7 @@ import {ASTLeaf} from "./ast/ASTLeaf"
 import {Lexer} from './Lexer';
 import {ParseError} from './ParseError';
 
-class Parser {
+export class Parser {
     static factoryName:string = "create";
     protected elements:Element[];
     private type:new (list:ASTree[])=>ASTree;
@@ -24,15 +24,15 @@ class Parser {
         clazz && (this.type = clazz);
         return this;
     }
-    number(clazz?:new ()=>ASTLeaf){
+    number(clazz?:new (t:Token)=>ASTLeaf){
         this.elements.push(new NumToken(clazz))
         return this;
     }
-    identifier(reserved:Set<string>,clazz?:new ()=>ASTLeaf){
+    identifier(reserved:Set<string>,clazz?:new (t:Token)=>ASTLeaf){
         this.elements.push(new IdToken(clazz,reserved));
         return this;
     }
-    string(clazz?:new ()=>ASTLeaf){
+    string(clazz?:new (t:Token)=>ASTLeaf){
         this.elements.push(new StrToken(clazz));
         return this;
     }
@@ -40,8 +40,13 @@ class Parser {
         this.elements.push(new Leaf(strs));
         return this;
     }
-    sep(p:Parser){
+    sep(...p:string[]){
+        this.elements.push(new Skip(<string[]>p));
+        return this;
+    }
+    ast(p:Parser){
         this.elements.push(new Tree(p));
+        // this.elements.push(new Leaf(strs));
         return this;
     }
     or(...p:Parser[]){
@@ -77,10 +82,7 @@ class Parser {
         }
         return this;
     }
-    ast(...strs:string[]){
-        this.elements.push(new Leaf(strs));
-        return this;
-    }
+
     parse(lexer:Lexer):ASTree{
         var res:ASTree[] = [];
         for (var element of this.elements) {
@@ -172,14 +174,16 @@ class Repeat extends Element {
 }
 abstract class AToken extends Element{
 
-    protected type:{new():ASTLeaf};
-	constructor(type:{new():ASTLeaf}) {
+    protected type:{new(t:Token):ASTLeaf};
+	constructor(type?:{new(t:Token):ASTLeaf}) {
+        type || (type = ASTLeaf);
         super()
+        this.type = type;
 	}
     parse(lexer:Lexer,res:ASTree[]){
         var t:Token = lexer.read();
         if(this.test(t)){
-            var leaf:ASTLeaf = new this.type();
+            var leaf:ASTLeaf = new this.type(t);
             res.push(leaf);
         }else{
             throw new ParseError(t);
@@ -195,7 +199,7 @@ abstract class AToken extends Element{
 class IdToken extends AToken {
     reserved:Set<string>
 
-	constructor(type:{new():ASTLeaf},r:Set<string>) {
+	constructor(type:{new(t:Token):ASTLeaf},r:Set<string>) {
         super(type);
         this.reserved = r||new Set<string>();
 	}
@@ -204,7 +208,7 @@ class IdToken extends AToken {
     }
 }
 class NumToken extends AToken {
-	constructor(type:{new():ASTLeaf}) {
+	constructor(type:{new(t:Token):ASTLeaf}) {
         super(type);
 	}
     test(t:Token):boolean{
@@ -213,9 +217,6 @@ class NumToken extends AToken {
 }
 
 class StrToken extends AToken {
-	constructor(type:{new():ASTLeaf}) {
-        super(type);
-	}
     test(t:Token):boolean{
         return t.isString();
     }
@@ -276,7 +277,7 @@ class Precedence {
         this.leftAssoc = a;
 	}
 }
-class Operators extends Map<string,Precedence>{
+export class Operators extends Map<string,Precedence>{
     static LEFT:boolean = true;
     static RIGHT:boolean = false;
     add(name:string,prec:number,leftAssoc:boolean){

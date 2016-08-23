@@ -4,7 +4,7 @@ import {ASTLeaf} from "./ASTLeaf"
 /**
  * BinaryExpr
  */
-class BinaryExpr extends ASTList{
+export class BinaryExpr extends ASTList{
     constructor(c:ASTree[]) {
         super(c);
     }
