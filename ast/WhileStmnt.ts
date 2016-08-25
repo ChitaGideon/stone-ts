@@ -1,5 +1,5 @@
 import {ASTList} from './ASTList';
-
+import {ASTree} from './ASTree';
 
 export class WhileStmnt extends ASTList{
     condition():ASTree{
@@ -10,6 +10,5 @@ export class WhileStmnt extends ASTList{
     }
     toString():string{
         return "(while " + this.condition() + " " + this.body() + ")";
-
     }
 }

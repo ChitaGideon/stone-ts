@@ -124,7 +124,7 @@ class IdToken extends Token{
         super(line);
         this.value = str;
     }
-    isString(){
+    isIdentifier(){
         return true;
     }
     get text(){

@@ -1,3 +1,4 @@
+import {ASTree} from './ast/ASTree';
 import {WhileStmnt} from './ast/WhileStmnt';
 import {NullStmnt} from './ast/NullStmnt';
 import {IfStmnt} from './ast/IfStmnt';
@@ -11,10 +12,11 @@ import {StringLiteral} from './ast/StringLiteral';
 import {Lexer} from './Lexer';
 import {Token} from './Token';
 import {Parser, Operators} from './Parser';
-const {rule} = Parser;
+
+const rule = Parser.rule;
 
 
-class BasicParser{
+export class BasicParser {
     reserved:Set<string> = new Set;
     operators:Operators = new Operators;
     expr0:Parser = rule();

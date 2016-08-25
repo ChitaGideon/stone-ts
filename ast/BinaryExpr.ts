@@ -1,5 +1,6 @@
-import {ASTList} from "./ASTList"
-import {ASTLeaf} from "./ASTLeaf"
+import {ASTList} from './ASTList';
+import {ASTLeaf} from './ASTLeaf';
+import {ASTree} from './ASTree';
 
 /**
  * BinaryExpr

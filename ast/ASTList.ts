@@ -1,3 +1,4 @@
+import {ASTree} from './ASTree';
 import {Token} from "../token"
 
 export class ASTList extends ASTree{
@@ -7,7 +8,7 @@ export class ASTList extends ASTree{
         this._children = list;
     }
     child(i:number):ASTree{
-        return this._children[0];
+        return this._children[i];
     }
     numChildren():number{
         return this._children.length;

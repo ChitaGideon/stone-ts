@@ -8,6 +8,9 @@ export class Token {
     set lineNumber(line:number){
         this._lineNumber = line;
     }
+    get lineNumber(){
+        return this._lineNumber;
+    }
     isEOF (){
         console.log("isEOF",this._lineNumber==-1)
         return this._lineNumber==-1

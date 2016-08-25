@@ -1,6 +1,7 @@
+import {ASTree} from './ast/ASTree';
 import {Token} from './Token';
 import {ASTList} from './ast/ASTList';
-import {ASTLeaf} from "./ast/ASTLeaf"
+import {ASTLeaf} from './ast/ASTLeaf';
 import {Lexer} from './Lexer';
 import {ParseError} from './ParseError';
 
@@ -16,12 +17,16 @@ export class Parser {
         return new Parser(p.type,p.elements);
     }
 	constructor(clazz:new (list:ASTree[])=>ASTree,elements?:Element[]) {
-        this.type = clazz;
-        this.elements = elements;
+        clazz && (this.type = clazz);
+        if(elements){
+            this.elements = elements;
+        }else{
+            this.reset(clazz);
+        }
 	}
     reset(clazz?:new (list:ASTree[])=>ASTree){
         this.elements = [];
-        clazz && (this.type = clazz);
+        clazz!=undefined && (this.type = clazz);
         return this;
     }
     number(clazz?:new (t:Token)=>ASTLeaf){
@@ -88,7 +93,8 @@ export class Parser {
         for (var element of this.elements) {
             element.parse(lexer,res);
         }
-        return new this.type(res);
+        return this.type?new this.type(res):(res.length==1?res[0]:new ASTList(res));
+        // return new this.type(res);
     }
 
     match(lexer:Lexer):boolean{
@@ -129,11 +135,12 @@ class OrTree extends Element{
         // this.parsers = newParsers;  
     }
     choose(lexer:Lexer):Parser{
-        this.parsers.forEach(element => {
+        for (var index = 0; index < this.parsers.length; index++) {
+            var element = this.parsers[index];
             if(element.match(lexer)){
                 return element;
             }
-        });
+        }
         return null;
     }
     parse(lexer:Lexer,res:ASTree[]){

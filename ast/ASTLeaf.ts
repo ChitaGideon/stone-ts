@@ -1,3 +1,4 @@
+import {ASTree} from './ASTree';
 import {Token} from "../token"
 
 export class ASTLeaf extends ASTree{
@@ -11,7 +12,7 @@ export class ASTLeaf extends ASTree{
         throw new Error("haha ~");
 
     }
-    numChildren(i:number):number{
+    numChildren():number{
         return 0;
     }
     children():ASTree[]{
@@ -22,6 +23,9 @@ export class ASTLeaf extends ASTree{
     }
     get token():Token{
         return this._token;
+    }
+    toString(){
+        return this.token.text;
     }
 
 }
