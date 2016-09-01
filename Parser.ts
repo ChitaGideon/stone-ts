@@ -1,3 +1,4 @@
+import {PrimaryExpr} from './ast/PrimaryExpr';
 import {ASTree} from './ast/ASTree';
 import {Token} from './Token';
 import {ASTList} from './ast/ASTList';
@@ -93,7 +94,7 @@ export class Parser {
         for (var element of this.elements) {
             element.parse(lexer,res);
         }
-        return this.type?new this.type(res):(res.length==1?res[0]:new ASTList(res));
+        return this.type?(this.type['create']?this.type['create'](res):new this.type(res)):(res.length==1?res[0]:new ASTList(res));
         // return new this.type(res);
     }
 
@@ -146,7 +147,7 @@ class OrTree extends Element{
     parse(lexer:Lexer,res:ASTree[]){
         var p : Parser = this.choose(lexer);
         if(p)
-            return res.push(p.parse(lexer))
+            res.push(p.parse(lexer))
         else 
             throw new ParseError(lexer.peek(0));
     }
@@ -165,7 +166,7 @@ class Repeat extends Element {
     parse(lexer:Lexer,res:ASTree[]){
         while(this.parser.match(lexer)){
             var t:ASTree = this.parser.parse(lexer)
-            if(t instanceof ASTList || (<ASTList>t).numChildren() >0){
+            if(!(t instanceof ASTList) || (<ASTList>t).numChildren() >0){
                 res.push(t);
             }
             if(this.onlyOnce){

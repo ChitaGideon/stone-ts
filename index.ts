@@ -1,3 +1,5 @@
+import {Evaluator,init} from './BasicEvaluator';
+import {BasicEnv} from './Environment';
 import {ASTree} from './ast/ASTree';
 import {BasicParser} from './BasicParser';
 import LineByLine = require('line-by-line');
@@ -25,6 +27,26 @@ class Startup {
         console.log("close1");
         return 0;
     }
+    public static interpreter(): number {
+        // var reader = new LineByLine("./testdata/test2.stone");
+        init();
+        var l:Lexer = new Lexer(createInterface({input: createReadStream(dataPath)}));
+        var basicParser:BasicParser = new BasicParser();
+        var env = new BasicEnv();
+        setTimeout(function() {
+            // for (var token:Token; (token=l.read(),token!= Token.EOF);) {
+            //     console.log("=>",token.text);
+            // }
+            while(l.peek(0) != Token.EOF){
+                var ast:any  =  basicParser.parse(l);
+                console.log("eval:",ast.toString());
+                let res = (<Evaluator>ast).eval(env);
+                console.log("=>",res.toString());
+            }
+        }, 1000);
+        console.log("close1");
+        return 0;
+    }
 }
 
-Startup.main();
+Startup.interpreter();

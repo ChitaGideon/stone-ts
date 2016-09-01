@@ -44,7 +44,6 @@ export class BasicParser {
 
      program:Parser = rule().or(this.statement, rule(NullStmnt))
                            .sep(";", Token.EOL);
-
     constructor() {
         this.reserved.add(";");
         this.reserved.add("}");

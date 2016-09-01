@@ -2,7 +2,7 @@ import {ASTLeaf} from './ASTLeaf';
 import {ASTList} from './ASTList';
 
 export class StringLiteral extends ASTLeaf {
-    value(){
+    get value() {
         return this.token.text;
     }
 }
